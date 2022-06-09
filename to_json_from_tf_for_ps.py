@@ -6,29 +6,17 @@ from pathlib import Path
 
 
 if __name__ == '__main__':
-    tf_md = Path('tf.md').read_text('utf-8')
+    tf_ps = Path('List_of_all_TF_API.md').read_text('utf-8')
 
     current_header = ""
     result = []
 
-    for line in tf_md.split('\n'):
-        try:
-            # Header
-            if line.startswith('##'):
-                current_header = line.replace('## ', '')
-
-            # Module/class/function
-            elif line.startswith('[`'):
-                line = line[2:]
-                split = line.split('`](')
-                name = split[0]
-                split = split[1].split(')')
-                path = split[0]
-                desc = split[1]
-
+    for line in tf_ps.split('\n'):
+        try:           
+            # primary symbol surrounded by |
+            if line.startswith('|'):
                 # Normalize name
-                name = name.replace('class ', '')
-                name = name.replace('(...)', '')
+                name = name.strip('|')
 
                 # Normalize desc
                 desc = desc.replace(': ', '')
@@ -42,4 +30,4 @@ if __name__ == '__main__':
         except (IndexError, TypeError) as e:
             print(f'Error processing line {line} - {e}')
     
-    Path(r'C:\Users\suhas\git\tf_frontend\src\meta.json').write_text(json.dumps(result))
+    Path(r'C:\Users\suhas\git\tf_frontend\src\meta_primary_symbol.json').write_text(json.dumps(result))
