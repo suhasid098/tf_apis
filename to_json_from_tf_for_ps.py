@@ -1,33 +1,30 @@
 import json
-from pydoc import doc
-import re
 import tensorflow as tf
 from pathlib import Path
 
 
 if __name__ == '__main__':
-    tf_ps = Path('List_of_all_TF_API.md').read_text('utf-8')
+    #Get list of tf primary symbol apis from csv
+    tf_ps = Path('List_of_all_TF_API.csv').read_text('utf-8').split('\n')[1:]
 
-    current_header = ""
     result = []
 
-    for line in tf_ps.split('\n'):
-        try:           
-            # primary symbol surrounded by |
-            if line.startswith('|'):
-                # Normalize name
-                name = name.strip('|')
+    for api in tf_ps:
 
-                # Normalize desc
-                desc = desc.replace(': ', '')
+        api = api.strip()
+        # Verify the api is not empty
+        if api == '':
+            continue
 
-                docstring = eval(f'tf.{name}.__doc__') or ''
-                pattern = re.compile('(>>>.*?\n\n)', re.DOTALL)
-                docstring = re.sub(pattern, '```\\1```\n', docstring)
+        try:
+            # Call __doc__ on each api to obtain the docstring
+            docs = eval(f'{api}.__doc__') or ''
+            # Use the first line of the docstring as the short description
+            desc = docs.split('\n')[0]
 
-                result.append({'name': name, 'path': path, 'desc': desc, 'type': current_header, 
-                    'docs': docstring})
-        except (IndexError, TypeError) as e:
-            print(f'Error processing line {line} - {e}')
-    
+            # Add to results
+            result.append({'name': api, 'docs': docs, 'desc': desc, 'type': 'API'})
+
+        except AttributeError as e:
+            print(f'Error processing {api}: {e}')
     Path(r'C:\Users\suhas\git\tf_frontend\src\meta_primary_symbol.json').write_text(json.dumps(result))
